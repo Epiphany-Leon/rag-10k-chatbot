@@ -151,3 +151,12 @@ def chat(req: ChatRequest):
 @app.get("/api/health")
 def health():
     return {"status": "ok"}
+
+
+# ---- serve the static Next.js export (built with BUILD_EXPORT=1) -----------
+# Mounted last so it only catches routes the /api/* handlers above did not.
+_WEB = ROOT / "web" / "out"
+if _WEB.exists():
+    from fastapi.staticfiles import StaticFiles
+    app.mount("/", StaticFiles(directory=str(_WEB), html=True), name="web")
+
