@@ -16,11 +16,14 @@ from .config import COMPANIES
 # retrieved 10-K text, regardless of how the persona is edited in the UI.
 GROUNDING_RULES = (
     "You answer ONLY using the context from the companies' 10-K filings shown "
-    "below. If the context does not contain the answer, reply exactly: "
+    "below. If the context does not contain the figures needed, reply exactly: "
     "\"I don't have enough information in the provided 10-K filings to answer "
-    "that.\" Never invent numbers. When you state a figure or fact, cite its "
-    "source inline like [Amazon p.4]. Be precise with financial figures and "
-    "include the reporting period.\n\n"
+    "that.\" Never invent numbers. You MAY, however, COMPUTE a derived value "
+    "from figures that ARE present in the context, for example working capital = "
+    "total current assets − total current liabilities, a year-over-year change, "
+    "a growth rate, or a ratio; show the arithmetic and cite the source lines. "
+    "When you state a figure, cite its source inline like [Amazon p.4]. Be "
+    "precise with financial figures and include the reporting period.\n\n"
     "Context from the 10-K filings:\n{context}"
 )
 
@@ -35,6 +38,46 @@ def make_retriever(store, search_type: str, top_k: int,
     if search_type == "mmr":
         search_kwargs.update({"fetch_k": fetch_k, "lambda_mult": mmr_lambda})
     return store.as_retriever(search_type=search_type, search_kwargs=search_kwargs)
+
+
+QUERY_EXPANSION_PROMPT = (
+    "You rewrite a question about company 10-K filings into search queries that "
+    "use the exact wording found in financial statements. Output {n} short "
+    "queries, one per line, no numbering, no commentary. Expand derived metrics "
+    "into the line items they are computed from, e.g. 'working capital' -> "
+    "'total current assets' and 'total current liabilities'; 'liquidity' -> "
+    "'current assets', 'current ratio'; 'main source of revenue' -> 'revenue by "
+    "segment', 'segment results'.\n\nQuestion: {q}"
+)
+
+
+class MultiQueryRetriever:
+    """
+    Wrap a retriever with LLM query expansion. The natural phrasing of a question
+    ("how did working capital change?") often does not match the source text
+    ("total current assets / liabilities"); expanding into financial-statement
+    terms and unioning the results bridges that query-to-chunk gap (the residual
+    miss identified in Stage-2).
+    """
+
+    def __init__(self, base, llm, n: int = 3, cap: int = 10):
+        self.base, self.llm, self.n, self.cap = base, llm, n, cap
+
+    def _expand(self, question: str) -> list[str]:
+        try:
+            text = self.llm.invoke(
+                QUERY_EXPANSION_PROMPT.format(q=question, n=self.n)).content
+        except Exception:  # noqa: BLE001 — fall back to the raw question
+            return [question]
+        lines = [ln.strip("-*•0123456789. \t") for ln in text.splitlines()]
+        return [question] + [ln for ln in lines if ln][: self.n]
+
+    def invoke(self, question: str) -> list[Document]:
+        seen: dict[str, Document] = {}
+        for q in self._expand(question):
+            for d in self.base.invoke(q):
+                seen.setdefault(d.page_content, d)
+        return list(seen.values())[: self.cap]
 
 
 def detect_companies(question: str, in_scope: list[str]) -> list[str]:

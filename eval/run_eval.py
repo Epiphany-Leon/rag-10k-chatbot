@@ -27,8 +27,8 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from ragstudio.chains import (RagEngine, build_query_retriever,  # noqa: E402
-                              detect_companies)
+from ragstudio.chains import (MultiQueryRetriever, RagEngine,  # noqa: E402
+                              build_query_retriever, detect_companies)
 from ragstudio.config import CORE_COMPANIES, DEFAULTS           # noqa: E402
 from ragstudio.indexer import build_index, chunk_corpus         # noqa: E402
 from ragstudio.providers import build_llm                       # noqa: E402
@@ -73,6 +73,8 @@ def main():
     p.add_argument("--judge-model", default="gemini-2.0-flash")
     p.add_argument("--no-hybrid", action="store_true",
                    help="Use vector-only retrieval instead of BM25+vector hybrid.")
+    p.add_argument("--no-expand", action="store_true",
+                   help="Disable LLM multi-query expansion.")
     p.add_argument("--tag", default="default")
     args = p.parse_args()
 
@@ -89,11 +91,14 @@ def main():
 
     def retriever_for(question):
         companies = detect_companies(question, CORE_COMPANIES)
-        return build_query_retriever(
+        r = build_query_retriever(
             store, all_chunks, companies, search_type=DEFAULTS["search_type"],
             top_k=args.top_k, fetch_k=DEFAULTS["fetch_k"],
             mmr_lambda=DEFAULTS["mmr_lambda"], hybrid=not args.no_hybrid,
             dense_weight=DEFAULTS["dense_weight"])
+        if not args.no_expand:
+            r = MultiQueryRetriever(r, llm, n=3, cap=2 * args.top_k)
+        return r
 
     rows, tally = [], {"CORRECT": 0, "PARTIAL": 0, "WRONG": 0}
     print(f"\nConfig: {args.provider}/{args.model} | emb={args.embedding} | "

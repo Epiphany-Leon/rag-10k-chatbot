@@ -173,6 +173,7 @@ DEFAULTS = {
     "mmr_lambda": 0.5,
     "hybrid": True,                # combine BM25 + vector retrieval
     "dense_weight": 0.6,           # ensemble weight on the vector retriever
+    "expand": True,                # LLM multi-query expansion before retrieval
 }
 
 

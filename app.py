@@ -11,7 +11,8 @@ import time
 import streamlit as st
 
 from prompts.personas import DEFAULT_PERSONA, PERSONAS
-from ragstudio.chains import RagEngine, build_query_retriever, detect_companies
+from ragstudio.chains import (MultiQueryRetriever, RagEngine,
+                              build_query_retriever, detect_companies)
 from ragstudio.config import (
     COMPANIES, CORE_COMPANIES, DEFAULTS, EMBEDDINGS, PROVIDERS,
     available_embeddings, available_providers,
@@ -103,6 +104,10 @@ def sidebar() -> dict:
     if hybrid:
         dense_weight = s.slider("Dense weight (vs BM25)", 0.0, 1.0,
                                 DEFAULTS["dense_weight"], 0.1)
+    expand = s.toggle("Query expansion (multi-query)", value=DEFAULTS["expand"],
+                      help="Rewrite the question into financial-statement terms "
+                           "before retrieving (e.g. 'working capital' → 'current "
+                           "assets/liabilities'). More accurate, slightly slower.")
 
     # ---- Chunking ----------------------------------------------------------
     s.subheader("✂️ Chunking")
@@ -144,7 +149,7 @@ def sidebar() -> dict:
         provider=provider, model=model, temperature=temperature, top_p=top_p,
         max_tokens=max_tokens, embedding=embedding, search_type=search_type,
         top_k=top_k, fetch_k=fetch_k, mmr_lambda=mmr_lambda,
-        hybrid=hybrid, dense_weight=dense_weight,
+        hybrid=hybrid, dense_weight=dense_weight, expand=expand,
         chunk_size=chunk_size, chunk_overlap=chunk_overlap, companies=companies,
         persona=persona, compare=compare, provider_b=provider_b, model_b=model_b,
         rebuild=rebuild,
@@ -235,6 +240,9 @@ def main():
         store, chunks, scope, search_type=cfg["search_type"], top_k=cfg["top_k"],
         fetch_k=cfg["fetch_k"], mmr_lambda=cfg["mmr_lambda"],
         hybrid=cfg["hybrid"], dense_weight=cfg["dense_weight"])
+    if cfg["expand"]:
+        exp_llm = build_llm(cfg["provider"], cfg["model"], 0.3, 1.0, 200)
+        retriever = MultiQueryRetriever(retriever, exp_llm, n=3, cap=2 * cfg["top_k"])
 
     with st.chat_message("assistant"):
         if set(scope) != set(cfg["companies"]):
