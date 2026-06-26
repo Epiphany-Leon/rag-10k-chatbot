@@ -137,10 +137,12 @@ filings (full ground truth in `eval/questions.yaml`):
 
 | Member | Role |
 |---|---|
-| _Name_ | _e.g. RAG pipeline & providers_ |
-| _Name_ | _Evaluation & question design_ |
-| _Name_ | _UI / deployment_ |
-| _Name_ | _10-K analysis & write-up_ |
+| Weiting Xia | RAG pipeline & retrieval (chunking, FAISS, hybrid BM25+vector) |
+| Jinfeng Chen | Model & provider integration (multi-LLM, embeddings) |
+| Yiying Wang | Evaluation & question design (eval set, LLM-judge harness) |
+| Wanying Li | 10-K analysis & ground truth (fact sheets, business insights) |
+| Kaipu Liu | UI / front-end (Streamlit, parameter controls, compare mode) |
+| Lihong Gao | Deployment & infrastructure (server, Caddy, GitHub) |
 
 ## 11. Reproducibility
 

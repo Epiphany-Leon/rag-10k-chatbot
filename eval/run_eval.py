@@ -27,9 +27,10 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from ragstudio.chains import RagEngine, make_retriever          # noqa: E402
+from ragstudio.chains import (RagEngine, make_hybrid_retriever,  # noqa: E402
+                              make_retriever)
 from ragstudio.config import CORE_COMPANIES, DEFAULTS           # noqa: E402
-from ragstudio.indexer import build_index                       # noqa: E402
+from ragstudio.indexer import build_index, chunk_corpus         # noqa: E402
 from ragstudio.providers import build_llm                       # noqa: E402
 
 JUDGE_PROMPT = (
@@ -70,6 +71,8 @@ def main():
     p.add_argument("--chunk-overlap", type=int, default=DEFAULTS["chunk_overlap"])
     p.add_argument("--judge-provider", default="Google Gemini")
     p.add_argument("--judge-model", default="gemini-2.0-flash")
+    p.add_argument("--no-hybrid", action="store_true",
+                   help="Use vector-only retrieval instead of BM25+vector hybrid.")
     p.add_argument("--tag", default="default")
     args = p.parse_args()
 
@@ -80,7 +83,12 @@ def main():
     store = build_index(args.embedding, args.chunk_size, args.chunk_overlap,
                         CORE_COMPANIES)
     retriever = make_retriever(store, DEFAULTS["search_type"], args.top_k,
-                               DEFAULTS["fetch_k"], DEFAULTS["mmr_lambda"])
+                               DEFAULTS["fetch_k"], DEFAULTS["mmr_lambda"],
+                               CORE_COMPANIES)
+    if not args.no_hybrid:
+        chunks = chunk_corpus(CORE_COMPANIES, args.chunk_size, args.chunk_overlap)
+        retriever = make_hybrid_retriever(retriever, chunks, args.top_k,
+                                          DEFAULTS["dense_weight"])
     llm = build_llm(args.provider, args.model, args.temperature,
                     DEFAULTS["top_p"], DEFAULTS["max_tokens"])
     engine = RagEngine(llm, retriever, "")
