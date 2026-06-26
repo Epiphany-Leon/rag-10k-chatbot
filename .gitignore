@@ -1,0 +1,27 @@
+# ---- secrets (NEVER commit) ----
+.env
+.env.*
+!.env.example
+*.key
+secrets.toml
+.streamlit/secrets.toml
+
+# ---- built vector indexes (regenerated on first run) ----
+.cache/
+faiss_index/
+*.faiss
+*.pkl
+
+# ---- python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# ---- os / editor ----
+.DS_Store
+.idea/
+.vscode/
+*.log

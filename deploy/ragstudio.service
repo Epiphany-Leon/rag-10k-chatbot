@@ -1,0 +1,16 @@
+[Unit]
+Description=10-K RAG Studio (Streamlit)
+After=network.target
+
+[Service]
+Type=simple
+User=__USER__
+WorkingDirectory=__APP_DIR__
+EnvironmentFile=__APP_DIR__/.env
+ExecStart=__APP_DIR__/.venv/bin/streamlit run app.py \
+  --server.port 8501 --server.address 127.0.0.1 --server.headless true
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

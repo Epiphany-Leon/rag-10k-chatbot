@@ -1,0 +1,214 @@
+# ============================================================================
+#  Verified test-question set for the 10-K RAG chatbot.
+#  14 questions across: business, number, risk, comparison, boundary.
+#  Every ground-truth answer was extracted from the filings and then
+#  independently fact-checked against the source pages by a separate pass.
+#  'boundary' questions probe hallucination (figures/companies NOT in the
+#  corpus) -- the correct behaviour is for the bot to REFUSE.
+#  is_challenge: the 2 questions we pose to other teams (Q11, Q14).
+# ============================================================================
+questions:
+- id: Q01
+  category: business
+  difficulty: easy
+  is_challenge: false
+  question: What is the main source of revenue for Alphabet, and roughly what share of total revenue does
+    it represent in fiscal year 2025?
+  ground_truth: Google Services is Alphabet's dominant revenue source, generating $342,721 million of
+    the $402,836 million total revenue (about 85%) in FY2025. Within Google Services, Google advertising
+    is the core driver at $294,691 million, and the filing states more than 70% of total revenues came
+    from online advertising in 2025.
+  sources:
+  - Alphabet p.88
+  - Alphabet p.16
+  - Alphabet p.61
+  verified: true
+- id: Q02
+  category: business
+  difficulty: medium
+  is_challenge: false
+  question: For Amazon, identify the largest segment by net sales versus the largest contributor to operating
+    income in FY2025. Are they the same?
+  ground_truth: They are different. North America is the largest segment by net sales at $426,305 million
+    (International $161,894M; AWS $128,725M). AWS is the largest contributor to operating income at $45,606
+    million of the $79,975 million consolidated operating income (about 57%), versus North America's $29,619
+    million and International's $4,750 million.
+  sources:
+  - Amazon p.109
+  - Amazon p.61
+  verified: true
+- id: Q03
+  category: business
+  difficulty: easy
+  is_challenge: false
+  question: What are Microsoft's three reportable segments, and which one is the largest by revenue in
+    FY2025?
+  ground_truth: Microsoft's three reportable segments are Productivity and Business Processes, Intelligent
+    Cloud, and More Personal Computing. The largest by revenue is Productivity and Business Processes
+    at $120,810 million in FY2025 (Intelligent Cloud $106,265M; More Personal Computing $54,649M).
+  sources:
+  - Microsoft p.84
+  - Microsoft p.38
+  verified: true
+- id: Q04
+  category: number
+  difficulty: easy
+  is_challenge: false
+  question: What were Alphabet's cash and cash equivalents at December 31, 2025 versus December 31, 2024,
+    and how much did they change?
+  ground_truth: Alphabet's cash and cash equivalents were $30,708 million at December 31, 2025 versus
+    $23,466 million at December 31, 2024, an increase of $7,242 million. (Total cash, cash equivalents,
+    and marketable securities was $126,843 million at year-end 2025.)
+  sources:
+  - Alphabet p.49
+  verified: true
+- id: Q05
+  category: number
+  difficulty: medium
+  is_challenge: false
+  question: How did Microsoft's working capital change from FY2024 to FY2025?
+  ground_truth: 'Microsoft''s working capital (total current assets minus total current liabilities) rose
+    to $49,913 million in FY2025 (current assets $191,131M minus current liabilities $141,218M) from $34,448
+    million in FY2024 ($159,734M minus $125,286M), an increase of about $15.5 billion. The current ratio
+    improved to roughly 1.35x from 1.28x. Note: the 10-K does not present a labeled ''working capital''
+    line; these figures are computed from the balance sheet.'
+  sources:
+  - Microsoft p.52
+  verified: true
+- id: Q06
+  category: number
+  difficulty: easy
+  is_challenge: false
+  question: What was Amazon's total net sales and net income in FY2025, and how did net income compare
+    with FY2024?
+  ground_truth: Amazon's total net sales were $716,924 million in FY2025. Net income was $77,670 million,
+    up from $59,248 million in FY2024 (and $30,425 million in FY2023). Diluted EPS was $7.17.
+  sources:
+  - Amazon p.61
+  verified: true
+- id: Q07
+  category: number
+  difficulty: medium
+  is_challenge: false
+  question: What was Microsoft's Microsoft Cloud revenue in FY2025, and by how much did Azure and other
+    cloud services revenue grow?
+  ground_truth: Microsoft Cloud revenue was $168.9 billion in FY2025, up 23% year over year. Azure and
+    other cloud services revenue grew 34% in FY2025.
+  sources:
+  - Microsoft p.34
+  - Microsoft p.39
+  - Microsoft p.85
+  verified: true
+- id: Q08
+  category: risk
+  difficulty: medium
+  is_challenge: false
+  question: How does Amazon's 10-K describe its China- and India-specific regulatory risk, and how is
+    cloud handled in China?
+  ground_truth: Amazon discloses China/India risk under the risk factor 'Our International Operations
+    Expose Us to a Number of Risks' (heading p.11; PRC/India paragraph pp.12-13). The PRC and India regulate
+    Amazon's businesses through ownership restrictions and licensing requirements. On cloud specifically,
+    to meet local ownership, licensing, and cybersecurity requirements, Amazon provides 'certain technology
+    services in China through contractual relationships with third parties that hold PRC licenses.' India
+    risk is framed around foreign-ownership restrictions on online multi-brand retail (amazon.in operated
+    via third-party sellers with only an indirect minority interest), not cloud. Amazon warns that violations
+    or changed interpretations could lead to fines, revoked licenses, forced restructuring, or shutdown.
+  sources:
+  - Amazon p.12
+  - Amazon p.13
+  - Amazon p.11
+  verified: true
+- id: Q09
+  category: risk
+  difficulty: hard
+  is_challenge: false
+  question: Does Microsoft's 10-K disclose a China- or India-specific cloud business risk? Explain what
+    it actually says about China and India.
+  ground_truth: 'No. Microsoft''s FY2025 10-K contains no China- or India-specific cloud business-risk
+    disclosure. China and India are each named only in non-cloud-risk contexts: China appears in the Risk
+    Factors ''Competition laws and new market regulation'' bullet, listed among jurisdictions enforcing
+    competition/digital-market regulation (''the EU, the United Kingdom, the U.S., and China''); and both
+    China and India are named in Item 2 (Properties) as locations of Microsoft''s largest international
+    owned and leased properties (offices, datacenters, R&D). India appears only in the Properties section.
+    Cloud-relevant geopolitical risks (U.S. export controls, the AI Diffusion Rule, data-flow restrictions,
+    tariffs on the cloud and devices supply chain, sovereignty initiatives) are disclosed generically
+    without naming China or India.'
+  sources:
+  - Microsoft p.24
+  - Microsoft p.32
+  verified: true
+- id: Q10
+  category: comparison
+  difficulty: medium
+  is_challenge: false
+  question: Among Alphabet, Amazon, and Microsoft, rank the three by total revenue and by net income for
+    the most recent fiscal year, noting the fiscal periods.
+  ground_truth: 'By total revenue: Amazon $716,924M (FY ended Dec 31, 2025) > Alphabet $402,836M (FY ended
+    Dec 31, 2025) > Microsoft $281,724M (FY ended June 30, 2025). By net income the order flips at the
+    top: Alphabet $132,170M > Microsoft $101,832M > Amazon $77,670M. Note the periods differ: Microsoft''s
+    fiscal year ends June 30, while Alphabet and Amazon end December 31.'
+  sources:
+  - Amazon p.61
+  - Alphabet p.50
+  - Microsoft p.50
+  verified: true
+- id: Q11
+  category: comparison
+  difficulty: hard
+  is_challenge: true
+  question: Compare the year-over-year working capital trend for Alphabet, Amazon, and Microsoft in their
+    most recent fiscal year. Which improved most and which was roughly flat?
+  ground_truth: 'All three figures are computed from balance sheets (no labeled working-capital line).
+    Alphabet improved most in absolute dollars: working capital rose to about $103,293M from about $74,589M,
+    up roughly $28.7 billion. Microsoft rose to $49,913M from $34,448M, up about $15.5 billion. Amazon
+    was roughly flat to slightly lower: about $11,078M in 2025 versus about $11,436M in 2024, a decline
+    of about $358 million. So Alphabet improved most and Amazon was essentially flat (slightly down).'
+  sources:
+  - Alphabet p.49
+  - Amazon p.63
+  - Microsoft p.52
+  verified: true
+- id: Q12
+  category: boundary
+  difficulty: hard
+  is_challenge: false
+  question: What does Tesla's 10-K say about the risks of operating its cloud-services business in India?
+  ground_truth: 'The bot should refuse / state that this cannot be answered as framed. Tesla does not
+    have a cloud-services line of business, and its 10-K contains no discussion of cloud-service risk.
+    The filing also contains zero references to India anywhere. Tesla does disclose China business risks
+    (privacy/cybersecurity and data-localization laws, trade/tariff exposure, manufacturing at Gigafactory
+    and Megafactory Shanghai, an RMB working-capital facility, China as its #2 revenue market at $20,962M
+    in 2025), but nothing about India and nothing about cloud services. A correct answer declines to invent
+    an India cloud risk.'
+  sources:
+  - Tesla full-text search (no India, no cloud-services matches)
+  - Tesla p.51
+  - Tesla p.93
+  verified: true
+- id: Q13
+  category: boundary
+  difficulty: medium
+  is_challenge: false
+  question: What was Meta Platforms' total revenue and net income in fiscal year 2025 according to its
+    10-K in this corpus?
+  ground_truth: The bot should refuse. Meta Platforms (Facebook) is not part of this corpus. The available
+    10-Ks are Alphabet, Amazon, Microsoft, Apple, and Tesla. There is no Meta filing to draw from, so
+    the bot should state that it cannot answer rather than supplying numbers from memory.
+  sources:
+  - Out of corpus (corpus = Alphabet, Amazon, Microsoft, Apple, Tesla)
+  verified: true
+- id: Q14
+  category: boundary
+  difficulty: hard
+  is_challenge: true
+  question: What exact dollar amount does Apple's 10-K report on its 'working capital' line, and what
+    current ratio does Apple disclose?
+  ground_truth: The bot should clarify that Apple's 10-K does not present a labeled 'working capital'
+    line item or a stated current ratio; both must be computed. Computed from the balance sheet, Apple
+    has negative working capital of approximately -$17,674 million in FY2025 (current assets $147,957M
+    minus current liabilities $165,631M) versus about -$23,405 million in FY2024, so the deficit narrowed
+    by about $5.7 billion. A correct answer flags that no such labeled line exists rather than fabricating
+    one.
+  sources:
+  - Apple p.34
+  verified: true

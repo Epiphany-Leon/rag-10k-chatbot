@@ -1,0 +1,17 @@
+# Cherry-Studio-inspired dark theme.
+[theme]
+base = "dark"
+primaryColor = "#7c5cff"          # violet accent (Cherry-Studio vibe)
+backgroundColor = "#1b1c20"
+secondaryBackgroundColor = "#26272c"
+textColor = "#e8e8ea"
+font = "sans serif"
+
+[server]
+headless = true
+enableCORS = false
+enableXsrfProtection = true
+maxUploadSize = 50
+
+[browser]
+gatherUsageStats = false
