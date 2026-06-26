@@ -92,26 +92,32 @@ Measured with `eval/run_eval.py` over the 14-question verified set; hybrid
 retrieval; judge = `glm-4-flash` (same grader for all settings). Full detail in
 [`eval/STAGE2_RESULTS.md`](eval/STAGE2_RESULTS.md) and `eval/results_*.csv`.
 
-| LLM | Embedding | top-k | chunk | Score |
-|---|---|---|---|---|
-| glm-4.6 | embedding-3 | 6 | 1000 | **46%** |
-| glm-4-flash (free) | embedding-3 | 6 | 1000 | **43%** |
-| glm-4-flash | embedding-3 | 12 | 1000 | **43%** |
-| glm-4-flash | embedding-3 | 6 | 2000 | **46%** |
+| LLM | Embedding | top-k | chunk | Retrieval | Score |
+|---|---|---|---|---|---|
+| glm-4.6 | embedding-3 | 6 | 1000 | baseline | 46% |
+| glm-4-flash (free) | embedding-3 | 6 | 1000 | baseline | 43% |
+| glm-4-flash | embedding-3 | 12 | 1000 | baseline | 43% |
+| glm-4-flash | embedding-3 | 6 | 2000 | baseline | 46% |
+| **glm-4.6** | **embedding-3** | **6** | **1000** | **+ tables + company scoping** | **57%** |
 
-**What the numbers say:**
-1. **LLM strength is not the bottleneck** — the free `glm-4-flash` lands within
-   3 points of the far larger `glm-4.6`.
-2. **More retrieval doesn't help** — top-k 6→12 stayed at 43%; extra chunks just
-   redistributed which questions passed (the "distraction" effect).
-3. **Chunk size helps** — 1000→2000 recovered +3%, because larger chunks keep
-   more of a financial table together.
-4. **The real wall is PDF table extraction** — most misses are honest refusals
-   on numeric/tabular questions whose figures were garbled out of the tables.
+**What the numbers say** (full ablation in [`eval/STAGE2_RESULTS.md`](eval/STAGE2_RESULTS.md)):
+1. **LLM strength is not the bottleneck** — free `glm-4-flash` is within 3 points
+   of the far larger `glm-4.6`.
+2. **More retrieval doesn't help** — top-k 6→12 stayed at 43% (the "distraction"
+   effect); larger chunks help only marginally.
+3. **Retrieval engineering is the lever** — adding linearized table chunks and
+   per-question company scoping lifted the score **46% → 57% (+11 pts)**.
+4. **Residual cap is the query-to-chunk gap** — derived-metric questions
+   ("working capital change") don't match the source text under any embedding
+   tested (we checked BGE too); the next lever is query rewriting, not a bigger
+   model.
 
 ## 7. Boundary & hallucination findings (Stage 3)
 
 The headline: **our bot fails *safe* — it refuses rather than hallucinates.**
+Full probe results in [`eval/STAGE3_BOUNDARY.md`](eval/STAGE3_BOUNDARY.md): of 8
+adversarial false-premise questions, 7 were refused and the 8th (a planted false
+number) was *corrected* — zero fabrications.
 
 - **Out-of-corpus probe (Q13):** "Meta's 2025 revenue?" Meta isn't one of our
   five filings → the bot replies *"I don't have enough information in the
