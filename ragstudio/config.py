@@ -127,6 +127,12 @@ EMBEDDINGS: dict[str, dict] = {
         "base_url": "https://open.bigmodel.cn/api/paas/v4",
         "model": "embedding-3", "dim": 2048,
     },
+    # Local, free, no API key — needs the optional install (requirements-local.txt).
+    # BGE is the embedding the finance-RAG literature recommends for 10-Ks.
+    "BGE-small (local, free)": {
+        "kind": "hf_local", "env": None,
+        "model": "BAAI/bge-small-en-v1.5", "dim": 384,
+    },
 }
 
 # ---------------------------------------------------------------- corpus
@@ -181,5 +187,6 @@ def available_providers() -> list[str]:
 
 
 def available_embeddings() -> list[str]:
-    """Embedding models whose API key is present in the environment."""
-    return [name for name, spec in EMBEDDINGS.items() if has_key(spec["env"])]
+    """Embedding models that are usable (key present, or local/no-key)."""
+    return [name for name, spec in EMBEDDINGS.items()
+            if spec.get("env") is None or has_key(spec["env"])]

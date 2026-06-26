@@ -1,0 +1,6 @@
+# Optional: run embeddings fully locally (free, offline, no API key).
+# Enables the "BGE-small (local, free)" embedding option.
+#   pip install -r requirements-local.txt
+# Pulls in PyTorch (~hundreds of MB); needs ~2 GB RAM at runtime, so prefer a
+# cloud embedding (Gemini / OpenAI) on small servers.
+sentence-transformers>=3.0.0

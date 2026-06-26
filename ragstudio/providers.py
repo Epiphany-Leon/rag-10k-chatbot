@@ -53,6 +53,15 @@ def build_llm(provider: str, model: str, temperature: float,
 def build_embeddings(name: str):
     """Return a LangChain embeddings object for the selected embedding model."""
     spec = EMBEDDINGS[name]
+
+    if spec["kind"] == "hf_local":
+        # Runs locally on CPU, no API key. Needs requirements-local.txt installed.
+        from langchain_huggingface import HuggingFaceEmbeddings
+        return HuggingFaceEmbeddings(
+            model_name=spec["model"],
+            encode_kwargs={"normalize_embeddings": True},
+        )
+
     if not has_key(spec["env"]):
         raise MissingKeyError(
             f"Embedding '{name}' needs {spec['env']} in your .env file."
