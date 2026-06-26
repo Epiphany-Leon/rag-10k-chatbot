@@ -133,15 +133,23 @@ EMBEDDINGS: dict[str, dict] = {
 # The 10-K filings shipped with the repo. `ticker` is stored on every chunk so
 # the retriever can be scoped to a subset of companies.
 COMPANIES: dict[str, dict] = {
-    "Alphabet":  {"ticker": "GOOGL", "file": "Alphabet_10k_2025.pdf"},
-    "Amazon":    {"ticker": "AMZN",  "file": "Amazon_10k_2025.pdf"},
-    "Microsoft": {"ticker": "MSFT",  "file": "Microsoft_10K_2025.pdf"},
-    "Apple":     {"ticker": "AAPL",  "file": "Apple_10k_2025.pdf"},
-    "Tesla":     {"ticker": "TSLA",  "file": "Tesla_10k_2025.pdf"},
+    "Alphabet":  {"ticker": "GOOGL", "file": "Alphabet_10k_2025.pdf",
+                  "aliases": ["alphabet", "google", "googl", "youtube", "waymo"]},
+    "Amazon":    {"ticker": "AMZN",  "file": "Amazon_10k_2025.pdf",
+                  "aliases": ["amazon", "amzn", "aws"]},
+    "Microsoft": {"ticker": "MSFT",  "file": "Microsoft_10K_2025.pdf",
+                  "aliases": ["microsoft", "msft", "azure", "xbox", "linkedin"]},
+    "Apple":     {"ticker": "AAPL",  "file": "Apple_10k_2025.pdf",
+                  "aliases": ["apple", "aapl", "iphone", "mac"]},
+    "Tesla":     {"ticker": "TSLA",  "file": "Tesla_10k_2025.pdf",
+                  "aliases": ["tesla", "tsla"]},
 }
 
 # The three companies the assignment asks us to compare (Apple/Tesla are bonus).
 CORE_COMPANIES = ["Alphabet", "Amazon", "Microsoft"]
+
+# Bump when the document loader changes so cached indexes rebuild automatically.
+CORPUS_VERSION = "tables-v1"
 
 # ---------------------------------------------------------------- defaults
 DEFAULTS = {

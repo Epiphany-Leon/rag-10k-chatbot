@@ -13,14 +13,15 @@ import hashlib
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 
-from .config import CACHE_DIR, EMBEDDINGS
+from .config import CACHE_DIR, CORPUS_VERSION, EMBEDDINGS
 from .loaders import load_corpus
 from .providers import build_embeddings
 
 
 def _index_key(embedding: str, chunk_size: int, chunk_overlap: int,
                companies: list[str]) -> str:
-    raw = f"{embedding}|{chunk_size}|{chunk_overlap}|{','.join(sorted(companies))}"
+    raw = (f"{CORPUS_VERSION}|{embedding}|{chunk_size}|{chunk_overlap}|"
+           f"{','.join(sorted(companies))}")
     digest = hashlib.sha1(raw.encode()).hexdigest()[:12]
     safe = embedding.replace(" ", "_").replace("/", "-")
     return f"{safe}__cs{chunk_size}_co{chunk_overlap}__{digest}"

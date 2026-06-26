@@ -10,6 +10,8 @@ from langchain_core.documents import Document
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
+from .config import COMPANIES
+
 # Always appended to the user's persona so the model stays grounded in the
 # retrieved 10-K text, regardless of how the persona is edited in the UI.
 GROUNDING_RULES = (
@@ -33,6 +35,30 @@ def make_retriever(store, search_type: str, top_k: int,
     if search_type == "mmr":
         search_kwargs.update({"fetch_k": fetch_k, "lambda_mult": mmr_lambda})
     return store.as_retriever(search_type=search_type, search_kwargs=search_kwargs)
+
+
+def detect_companies(question: str, in_scope: list[str]) -> list[str]:
+    """
+    Return the in-scope companies named (or aliased) in the question — e.g.
+    "Azure" → Microsoft, "Google" → Alphabet. Scoping retrieval to these stops
+    a question about one company from pulling another's balance sheet (the
+    cross-company contamination seen in Stage-2). Falls back to all in-scope
+    companies when the question names none (e.g. a generic comparison).
+    """
+    ql = question.lower()
+    hits = [name for name in in_scope
+            if any(a in ql for a in COMPANIES[name].get("aliases", [name.lower()]))]
+    return hits or list(in_scope)
+
+
+def build_query_retriever(store, all_chunks, companies, *, search_type, top_k,
+                          fetch_k, mmr_lambda, hybrid, dense_weight):
+    """Build a retriever scoped to `companies` (vector + optional BM25)."""
+    vr = make_retriever(store, search_type, top_k, fetch_k, mmr_lambda, companies)
+    if not hybrid:
+        return vr
+    scoped = [d for d in all_chunks if d.metadata.get("company") in companies]
+    return make_hybrid_retriever(vr, scoped or all_chunks, top_k, dense_weight)
 
 
 def make_hybrid_retriever(vector_retriever, bm25_docs, top_k: int,

@@ -27,8 +27,8 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from ragstudio.chains import (RagEngine, make_hybrid_retriever,  # noqa: E402
-                              make_retriever)
+from ragstudio.chains import (RagEngine, build_query_retriever,  # noqa: E402
+                              detect_companies)
 from ragstudio.config import CORE_COMPANIES, DEFAULTS           # noqa: E402
 from ragstudio.indexer import build_index, chunk_corpus         # noqa: E402
 from ragstudio.providers import build_llm                       # noqa: E402
@@ -82,23 +82,25 @@ def main():
     companies = sorted({c for q in questions for c in CORE_COMPANIES})
     store = build_index(args.embedding, args.chunk_size, args.chunk_overlap,
                         CORE_COMPANIES)
-    retriever = make_retriever(store, DEFAULTS["search_type"], args.top_k,
-                               DEFAULTS["fetch_k"], DEFAULTS["mmr_lambda"],
-                               CORE_COMPANIES)
-    if not args.no_hybrid:
-        chunks = chunk_corpus(CORE_COMPANIES, args.chunk_size, args.chunk_overlap)
-        retriever = make_hybrid_retriever(retriever, chunks, args.top_k,
-                                          DEFAULTS["dense_weight"])
+    all_chunks = chunk_corpus(CORE_COMPANIES, args.chunk_size, args.chunk_overlap)
     llm = build_llm(args.provider, args.model, args.temperature,
                     DEFAULTS["top_p"], DEFAULTS["max_tokens"])
-    engine = RagEngine(llm, retriever, "")
     judge = build_llm(args.judge_provider, args.judge_model, 0.0, 1.0, 512)
+
+    def retriever_for(question):
+        companies = detect_companies(question, CORE_COMPANIES)
+        return build_query_retriever(
+            store, all_chunks, companies, search_type=DEFAULTS["search_type"],
+            top_k=args.top_k, fetch_k=DEFAULTS["fetch_k"],
+            mmr_lambda=DEFAULTS["mmr_lambda"], hybrid=not args.no_hybrid,
+            dense_weight=DEFAULTS["dense_weight"])
 
     rows, tally = [], {"CORRECT": 0, "PARTIAL": 0, "WRONG": 0}
     print(f"\nConfig: {args.provider}/{args.model} | emb={args.embedding} | "
           f"k={args.top_k} | chunk={args.chunk_size}/{args.chunk_overlap}\n")
     for q in questions:
         try:
+            engine = RagEngine(llm, retriever_for(q["question"]), "")
             answer, _ = engine.answer(q["question"], [])
             verdict, reason = grade(judge, q["question"], q["ground_truth"], answer)
         except Exception as e:  # noqa: BLE001 — one slow/failed call shouldn't kill the run

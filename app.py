@@ -11,7 +11,7 @@ import time
 import streamlit as st
 
 from prompts.personas import DEFAULT_PERSONA, PERSONAS
-from ragstudio.chains import RagEngine, make_hybrid_retriever, make_retriever
+from ragstudio.chains import RagEngine, build_query_retriever, detect_companies
 from ragstudio.config import (
     COMPANIES, CORE_COMPANIES, DEFAULTS, EMBEDDINGS, PROVIDERS,
     available_embeddings, available_providers,
@@ -190,13 +190,10 @@ def main():
         st.error(f"Failed to build the index: {e}")
         st.stop()
 
-    retriever = make_retriever(store, cfg["search_type"], cfg["top_k"],
-                               cfg["fetch_k"], cfg["mmr_lambda"], cfg["companies"])
-    if cfg["hybrid"]:
-        chunks = get_chunks(cfg["chunk_size"], cfg["chunk_overlap"],
-                            tuple(cfg["companies"]))
-        retriever = make_hybrid_retriever(retriever, chunks, cfg["top_k"],
-                                          cfg["dense_weight"])
+    # Chunks for BM25 (cached). The retriever is built per question so it can be
+    # scoped to the company the question names (avoids cross-company mixups).
+    chunks = get_chunks(cfg["chunk_size"], cfg["chunk_overlap"],
+                        tuple(cfg["companies"]))
 
     # Header strip with the active configuration.
     st.title("📊 10-K RAG Studio")
@@ -233,7 +230,15 @@ def main():
 
     history = st.session_state.messages[:-1]
 
+    scope = detect_companies(question, cfg["companies"])
+    retriever = build_query_retriever(
+        store, chunks, scope, search_type=cfg["search_type"], top_k=cfg["top_k"],
+        fetch_k=cfg["fetch_k"], mmr_lambda=cfg["mmr_lambda"],
+        hybrid=cfg["hybrid"], dense_weight=cfg["dense_weight"])
+
     with st.chat_message("assistant"):
+        if set(scope) != set(cfg["companies"]):
+            st.caption(f"🔎 scoped to: {', '.join(scope)}")
         with st.spinner("Retrieving relevant 10-K passages…"):
             try:
                 docs = retriever.invoke(question)
