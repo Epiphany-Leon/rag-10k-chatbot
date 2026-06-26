@@ -176,7 +176,7 @@ DEFAULTS = {
     # the sidebar falls back to whatever provider/embedding has a key if these
     # are absent (e.g. a fresh clone with only a Gemini key).
     "provider": "Zhipu GLM",
-    "model": "glm-4.6",
+    "model": "glm-4-flash",        # fast + free; glm-4.6 is slower (pick for max quality)
     "embedding": "Zhipu embedding-3",
     "temperature": 0.2,
     "top_p": 1.0,
