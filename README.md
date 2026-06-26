@@ -17,12 +17,17 @@ of moving a slider.
 
 ## ✨ Features
 
-- **5 model providers, one dropdown** — Google Gemini, OpenAI (GPT), DeepSeek,
-  Kimi (Moonshot), and open-source models via Hugging Face. LLM and embedding
-  model are chosen independently (e.g. Llama-3 answering over Gemini embeddings).
+- **8 model providers, one dropdown** — Google Gemini, OpenAI (GPT), DeepSeek,
+  Kimi (Moonshot), **Zhipu GLM**, **Xiaomi MiMo**, **Anthropic Claude**, and
+  open-source models via Hugging Face. LLM and embedding model are chosen
+  independently (e.g. GLM answering over Gemini embeddings).
 - **Live parameter controls** (the Cherry-Studio touch): temperature, top-p,
-  max tokens, chunk size / overlap, top-k, MMR vs similarity, MMR λ, and an
-  editable system prompt with presets.
+  max tokens, chunk size / overlap, top-k, MMR vs similarity, MMR λ, an editable
+  system prompt with presets, and a **light / dark theme toggle**.
+- **Smart retrieval** — linearized 10-K *table* chunks, per-question company
+  scoping, and **multi-query expansion** (rewrites "working capital" → "current
+  assets / liabilities" before retrieving). Each was validated to move accuracy
+  in the Stage-2 study.
 - **Grounded answers with citations** — every reply cites `[Company p.N]` and
   the exact retrieved passages are shown in an expander.
 - **Compare mode** — answer the same question with two models side-by-side over
