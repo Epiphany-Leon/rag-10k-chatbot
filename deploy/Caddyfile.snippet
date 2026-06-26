@@ -1,0 +1,26 @@
+# Caddy reverse-proxy block for 10-K RAG Studio on its own subdomain.
+# Use this if your server already runs Caddy (instead of the nginx.conf option).
+#
+# Streamlit runs as a host service on 127.0.0.1:8501 (see ragstudio.service).
+# If Caddy runs in Docker, give the caddy service access to the host:
+#     # docker-compose.yml, under the caddy service:
+#     extra_hosts:
+#       - "host.docker.internal:host-gateway"
+# and proxy to host.docker.internal:8501 instead of 127.0.0.1:8501.
+
+rag.example.com {
+    encode zstd gzip
+    reverse_proxy 127.0.0.1:8501 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options    "nosniff"
+    }
+}
+
+# WebSocket note: Caddy proxies WebSockets transparently, so Streamlit's live
+# updates work with no extra config (unlike nginx, which needs Upgrade headers).
