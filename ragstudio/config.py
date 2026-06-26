@@ -172,9 +172,12 @@ CORPUS_VERSION = "tables-v1"
 
 # ---------------------------------------------------------------- defaults
 DEFAULTS = {
-    "provider": "Google Gemini",
-    "model": "gemini-2.0-flash",
-    "embedding": "Gemini text-embedding-004",
+    # Pinned to the funded, evaluated config so the deployed app works on load;
+    # the sidebar falls back to whatever provider/embedding has a key if these
+    # are absent (e.g. a fresh clone with only a Gemini key).
+    "provider": "Zhipu GLM",
+    "model": "glm-4.6",
+    "embedding": "Zhipu embedding-3",
     "temperature": 0.2,
     "top_p": 1.0,
     "max_tokens": 1024,
