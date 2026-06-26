@@ -25,3 +25,9 @@ venv/
 .idea/
 .vscode/
 *.log
+
+# ---- node / next.js ----
+node_modules/
+.next/
+web/.next/
+out/
