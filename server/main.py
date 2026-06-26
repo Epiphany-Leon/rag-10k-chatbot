@@ -30,7 +30,8 @@ from ragstudio.config import (COMPANIES, CORE_COMPANIES, DEFAULTS,  # noqa: E402
                               PROVIDERS, available_embeddings,
                               available_providers)
 from ragstudio.indexer import build_index, chunk_corpus         # noqa: E402
-from ragstudio.providers import MissingKeyError, build_llm      # noqa: E402
+from ragstudio.providers import (MissingKeyError, build_expansion_llm,  # noqa: E402
+                                 build_llm)
 
 app = FastAPI(title="10-K RAG Studio API")
 app.add_middleware(
@@ -121,7 +122,8 @@ def chat(req: ChatRequest):
             llm = build_llm(req.provider, req.model, req.temperature, req.top_p,
                             req.max_tokens)
             if req.expand:
-                retriever = MultiQueryRetriever(retriever, llm, n=3, cap=2 * req.top_k)
+                exp_llm = build_expansion_llm(req.provider, req.model)
+                retriever = MultiQueryRetriever(retriever, exp_llm, n=2, cap=2 * req.top_k)
             persona = req.persona or PERSONAS[DEFAULT_PERSONA]
             engine = RagEngine(llm, retriever, persona)
 

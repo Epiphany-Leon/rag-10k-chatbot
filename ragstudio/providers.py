@@ -8,6 +8,23 @@ import os
 
 from .config import EMBEDDINGS, NO_SAMPLING_MODELS, PROVIDERS, has_key
 
+# Fast, cheap models preferred for the query-rewriting step (it only reformulates
+# the question, so it should never be slowed down by a heavy answer model).
+_FAST_EXPANSION = [("Zhipu GLM", "glm-4-flash"), ("DeepSeek", "deepseek-chat"),
+                   ("OpenAI", "gpt-4o-mini")]
+
+
+def build_expansion_llm(default_provider: str, default_model: str):
+    """A fast LLM for query expansion, independent of the (maybe slow) answer model."""
+    for prov, model in _FAST_EXPANSION:
+        spec = PROVIDERS.get(prov)
+        if spec and has_key(spec["env"]):
+            try:
+                return build_llm(prov, model, 0.3, 1.0, 200)
+            except Exception:  # noqa: BLE001
+                continue
+    return build_llm(default_provider, default_model, 0.3, 1.0, 200)
+
 
 class MissingKeyError(RuntimeError):
     """Raised when the API key for a selected provider is not configured."""

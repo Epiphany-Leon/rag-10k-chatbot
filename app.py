@@ -18,7 +18,8 @@ from ragstudio.config import (
     available_embeddings, available_providers,
 )
 from ragstudio.indexer import build_index, chunk_corpus, count_chunks
-from ragstudio.providers import MissingKeyError, build_embeddings, build_llm
+from ragstudio.providers import (MissingKeyError, build_embeddings,
+                                 build_expansion_llm, build_llm)
 
 st.set_page_config(page_title="10-K RAG Studio", page_icon="📊", layout="wide")
 
@@ -276,8 +277,8 @@ def main():
         fetch_k=cfg["fetch_k"], mmr_lambda=cfg["mmr_lambda"],
         hybrid=cfg["hybrid"], dense_weight=cfg["dense_weight"])
     if cfg["expand"]:
-        exp_llm = build_llm(cfg["provider"], cfg["model"], 0.3, 1.0, 200)
-        retriever = MultiQueryRetriever(retriever, exp_llm, n=3, cap=2 * cfg["top_k"])
+        exp_llm = build_expansion_llm(cfg["provider"], cfg["model"])
+        retriever = MultiQueryRetriever(retriever, exp_llm, n=2, cap=2 * cfg["top_k"])
 
     with st.chat_message("assistant"):
         if set(scope) != set(cfg["companies"]):
