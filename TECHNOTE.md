@@ -88,24 +88,48 @@ verified reference figures behind the question set are in
 
 ## 6. Results — settings comparison (Stage 2)
 
-> Populated from `eval/run_eval.py` over the verified question set in
-> `eval/questions.yaml`. (Run the harness with your keys to fill this table.)
+Measured with `eval/run_eval.py` over the 14-question verified set; hybrid
+retrieval; judge = `glm-4-flash` (same grader for all settings). Full detail in
+[`eval/STAGE2_RESULTS.md`](eval/STAGE2_RESULTS.md) and `eval/results_*.csv`.
 
-| Setting | LLM | Embedding | Score | Notes |
+| LLM | Embedding | top-k | chunk | Score |
 |---|---|---|---|---|
-| Powerful | _TBD_ | _TBD_ | _TBD_ | baseline ceiling |
-| Cheaper cloud | _TBD_ | _TBD_ | _TBD_ | |
-| Open-source | _TBD_ | _TBD_ | _TBD_ | |
+| glm-4.6 | embedding-3 | 6 | 1000 | **46%** |
+| glm-4-flash (free) | embedding-3 | 6 | 1000 | **43%** |
+| glm-4-flash | embedding-3 | 12 | 1000 | **43%** |
+| glm-4-flash | embedding-3 | 6 | 2000 | **46%** |
+
+**What the numbers say:**
+1. **LLM strength is not the bottleneck** — the free `glm-4-flash` lands within
+   3 points of the far larger `glm-4.6`.
+2. **More retrieval doesn't help** — top-k 6→12 stayed at 43%; extra chunks just
+   redistributed which questions passed (the "distraction" effect).
+3. **Chunk size helps** — 1000→2000 recovered +3%, because larger chunks keep
+   more of a financial table together.
+4. **The real wall is PDF table extraction** — most misses are honest refusals
+   on numeric/tabular questions whose figures were garbled out of the tables.
 
 ## 7. Boundary & hallucination findings (Stage 3)
 
-> Document here the cases where the bot fails or hallucinates, and what fixed it.
-> The question set includes deliberate `boundary` questions (figures the 10-K
-> does not disclose, companies not in the corpus) to probe this.
+The headline: **our bot fails *safe* — it refuses rather than hallucinates.**
 
-- _Example to fill: asked for a metric not disclosed → model should refuse._
-- _How we reduced hallucination: grounding suffix, lower temperature, citation
-  requirement, top-k tuning._
+- **Out-of-corpus probe (Q13):** "Meta's 2025 revenue?" Meta isn't one of our
+  five filings → the bot replies *"I don't have enough information in the
+  provided 10-K filings"* instead of inventing a number. ✅ (every setting)
+- **False-premise probe (Q12):** "Tesla's cloud-services risk in India?" Tesla
+  has no cloud business and never mentions India → refused. ✅
+- **False-premise probe (Q14):** "Apple's exact *working capital* line and
+  current ratio?" Apple discloses neither as a labeled figure → the bot should
+  flag that they must be computed; this is the trap that most tempts a guess.
+- **The honest failure mode:** on tabular numeric questions (segment revenues,
+  working-capital change) the bot often refuses a question it *should* be able to
+  answer, because the figure was garbled out of the PDF table and never
+  retrieved. That is a *recall* failure, not a hallucination.
+
+**How we keep hallucination low:** a fixed grounding suffix ("answer only from
+context, else say you don't know, never invent numbers, cite [Company p.N]"),
+temperature 0.2, and a tight retrieved context. **How to go further:**
+table-aware parsing so the numbers become retrievable in the first place.
 
 ## 8. Strengths & weaknesses
 
