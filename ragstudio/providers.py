@@ -44,7 +44,7 @@ def build_llm(provider: str, model: str, temperature: float,
         api_key=os.environ[spec["env"]],
         base_url=spec.get("base_url"),
         max_tokens=max_tokens,
-        timeout=90,
+        timeout=180,
         **sampling,
     )
 

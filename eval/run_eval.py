@@ -98,8 +98,11 @@ def main():
     print(f"\nConfig: {args.provider}/{args.model} | emb={args.embedding} | "
           f"k={args.top_k} | chunk={args.chunk_size}/{args.chunk_overlap}\n")
     for q in questions:
-        answer, _ = engine.answer(q["question"], [])
-        verdict, reason = grade(judge, q["question"], q["ground_truth"], answer)
+        try:
+            answer, _ = engine.answer(q["question"], [])
+            verdict, reason = grade(judge, q["question"], q["ground_truth"], answer)
+        except Exception as e:  # noqa: BLE001 — one slow/failed call shouldn't kill the run
+            answer, verdict, reason = f"(error: {e})", "WRONG", "request error"
         tally[verdict] = tally.get(verdict, 0) + 1
         rows.append({"id": q.get("id", ""), "category": q.get("category", ""),
                      "question": q["question"], "ground_truth": q["ground_truth"],
