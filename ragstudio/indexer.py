@@ -9,7 +9,9 @@ comparison is fast; switching the *embedding* or chunking rebuilds it.
 from __future__ import annotations
 
 import hashlib
+import json
 
+from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 
@@ -27,15 +29,39 @@ def _index_key(embedding: str, chunk_size: int, chunk_overlap: int,
     return f"{safe}__cs{chunk_size}_co{chunk_overlap}__{digest}"
 
 
+def _chunks_path(companies: list[str], chunk_size: int, chunk_overlap: int):
+    raw = (f"{CORPUS_VERSION}|chunks|{chunk_size}|{chunk_overlap}|"
+           f"{','.join(sorted(companies))}")
+    digest = hashlib.sha1(raw.encode()).hexdigest()[:12]
+    return CACHE_DIR / f"chunks__cs{chunk_size}_co{chunk_overlap}__{digest}.json"
+
+
 def chunk_corpus(companies: list[str], chunk_size: int, chunk_overlap: int):
-    """Load the requested 10-Ks and split them into overlapping chunks."""
+    """
+    Load the 10-Ks and split them into chunks, persisting the result to disk as
+    JSON. PDF parsing + table extraction (pdfplumber) is expensive, so caching
+    the chunks means a cold process (or a small server) never re-parses the PDFs.
+    """
+    path = _chunks_path(companies, chunk_size, chunk_overlap)
+    if path.exists():
+        try:
+            data = json.loads(path.read_text())
+            return [Document(page_content=d["c"], metadata=d["m"]) for d in data]
+        except Exception:  # noqa: BLE001 — fall through and rebuild
+            pass
     docs = load_corpus(companies)
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=chunk_size,
         chunk_overlap=chunk_overlap,
         separators=["\n\n", "\n", ". ", " ", ""],
     )
-    return splitter.split_documents(docs)
+    chunks = splitter.split_documents(docs)
+    try:
+        path.write_text(json.dumps(
+            [{"c": d.page_content, "m": d.metadata} for d in chunks]))
+    except Exception:  # noqa: BLE001
+        pass
+    return chunks
 
 
 def build_index(embedding: str, chunk_size: int, chunk_overlap: int,
