@@ -73,8 +73,8 @@ PROVIDERS: dict[str, dict] = {
         "kind": "openai_compatible",
         "env": "ZHIPU_API_KEY",
         "base_url": "https://open.bigmodel.cn/api/paas/v4",
-        "models": ["glm-4.6", "glm-4.5", "glm-4.5-air", "glm-4.5-flash", "glm-5"],
-        "note": "Open-source (MIT) GLM models via Zhipu BigModel; glm-4.5-flash is free.",
+        "models": ["glm-4.6", "glm-5.2", "glm-4.5-flash", "glm-4.5-air", "glm-4-flash"],
+        "note": "Open-source GLM via Zhipu BigModel; glm-4.5-flash / glm-4-flash are free.",
     },
     "Hugging Face (open-source)": {
         "kind": "openai_compatible",

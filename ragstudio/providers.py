@@ -66,10 +66,14 @@ def build_embeddings(name: str):
 
     if spec["kind"] in ("openai", "openai_compatible"):
         from langchain_openai import OpenAIEmbeddings
+        compat = spec["kind"] == "openai_compatible"
         return OpenAIEmbeddings(
             model=spec["model"], api_key=os.environ[spec["env"]],
             base_url=spec.get("base_url"),
-            check_embedding_ctx_length=spec["kind"] == "openai",
+            # Non-OpenAI endpoints use a different tokenizer and cap batch size;
+            # Zhipu allows max 64 inputs per embeddings request.
+            check_embedding_ctx_length=not compat,
+            chunk_size=64 if compat else 1000,
         )
 
     if spec["kind"] == "hf_api":
