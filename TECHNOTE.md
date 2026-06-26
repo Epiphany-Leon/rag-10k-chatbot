@@ -92,25 +92,24 @@ Measured with `eval/run_eval.py` over the 14-question verified set; hybrid
 retrieval; judge = `glm-4-flash` (same grader for all settings). Full detail in
 [`eval/STAGE2_RESULTS.md`](eval/STAGE2_RESULTS.md) and `eval/results_*.csv`.
 
-| LLM | Embedding | top-k | chunk | Retrieval | Score |
-|---|---|---|---|---|---|
-| glm-4.6 | embedding-3 | 6 | 1000 | baseline | 46% |
-| glm-4-flash (free) | embedding-3 | 6 | 1000 | baseline | 43% |
-| glm-4-flash | embedding-3 | 12 | 1000 | baseline | 43% |
-| glm-4-flash | embedding-3 | 6 | 2000 | baseline | 46% |
-| **glm-4.6** | **embedding-3** | **6** | **1000** | **+ tables + company scoping** | **57%** |
+| LLM | Embedding | Retrieval | Score |
+|---|---|---|---|
+| glm-4.6 | embedding-3 | baseline | 46% |
+| glm-4-flash (free) | embedding-3 | baseline | 43% |
+| glm-4.6 | embedding-3 | + tables + company scoping | 57% |
+| **glm-4-flash** (free) | **embedding-3** | **+ tables + scoping + query-expansion + compute** | **68%** |
 
 **What the numbers say** (full ablation in [`eval/STAGE2_RESULTS.md`](eval/STAGE2_RESULTS.md)):
 1. **LLM strength is not the bottleneck** — free `glm-4-flash` is within 3 points
-   of the far larger `glm-4.6`.
-2. **More retrieval doesn't help** — top-k 6→12 stayed at 43% (the "distraction"
+   of the far larger `glm-4.6`; with full retrieval it *beats* it (68% vs 57%).
+2. **More retrieval doesn't help** — top-k 6→12 stayed flat (the "distraction"
    effect); larger chunks help only marginally.
-3. **Retrieval engineering is the lever** — adding linearized table chunks and
-   per-question company scoping lifted the score **46% → 57% (+11 pts)**.
-4. **Residual cap is the query-to-chunk gap** — derived-metric questions
-   ("working capital change") don't match the source text under any embedding
-   tested (we checked BGE too); the next lever is query rewriting, not a bigger
-   model.
+3. **Retrieval engineering is the lever** — **46% → 57% → 68% (+22 pts total)**:
+   linearized table chunks + per-question company scoping (+11), then multi-query
+   expansion + a compute allowance (+11) that flips the derived-metric questions
+   (working capital) from honest refusals to correct computed answers.
+4. **Conclusion:** for QA over 10-Ks, *how you retrieve* matters more than *which
+   model* you use. Remaining misses are multi-hop reasoning or deliberate traps.
 
 ## 7. Boundary & hallucination findings (Stage 3)
 
