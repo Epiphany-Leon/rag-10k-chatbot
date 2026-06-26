@@ -1,10 +1,10 @@
-# Cherry-Studio-inspired dark theme.
+# Light base; the in-app Theme toggle injects a dark palette on demand.
 [theme]
-base = "dark"
-primaryColor = "#7c5cff"          # violet accent (Cherry-Studio vibe)
-backgroundColor = "#1b1c20"
-secondaryBackgroundColor = "#26272c"
-textColor = "#e8e8ea"
+base = "light"
+primaryColor = "#6d4dff"          # violet accent (Cherry-Studio vibe)
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f3f3f6"
+textColor = "#1b1c20"
 font = "sans serif"
 
 [server]

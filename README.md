@@ -93,6 +93,8 @@ Open http://localhost:8501. Pick a provider/model in the sidebar and ask away.
 | DeepSeek | `DEEPSEEK_API_KEY` | — | OpenAI-compatible, cheap |
 | Kimi (Moonshot) | `MOONSHOT_API_KEY` | — | OpenAI-compatible, long context |
 | Zhipu GLM | `ZHIPU_API_KEY` | ✅ (`glm-4.5-flash`) | open-source GLM-4.5/4.6/5 (MIT), OpenAI-compatible |
+| Xiaomi MiMo | `XIAOMI_API_KEY` | — | MiMo via the Token Plan endpoint, OpenAI-compatible |
+| Anthropic Claude | `ANTHROPIC_API_KEY` | — | Claude Sonnet/Opus/Haiku via the Anthropic API |
 | Hugging Face | `HUGGINGFACE_API_KEY` | ✅ (limited) | open-source LLMs + BGE/MiniLM embeddings |
 
 You only need keys for the providers you actually use. Unconfigured providers

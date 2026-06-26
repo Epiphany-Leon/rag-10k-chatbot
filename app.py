@@ -45,6 +45,37 @@ def get_chunks(chunk_size: int, chunk_overlap: int, companies: tuple[str, ...]):
     return chunk_corpus(list(companies), chunk_size, chunk_overlap)
 
 
+def apply_theme(mode: str) -> None:
+    """Inject a light or dark palette over Streamlit's chrome (in-app toggle)."""
+    if mode == "Dark":
+        p = dict(bg="#1b1c20", elev="#26272c", side="#202127",
+                 text="#e8e8ea", muted="#9a9aa2", border="#33343a")
+    else:
+        p = dict(bg="#ffffff", elev="#f6f6f8", side="#f3f3f6",
+                 text="#1b1c20", muted="#6b6b73", border="#e6e6ec")
+    st.markdown(
+        f"""
+        <style>
+          .stApp {{ background-color: {p['bg']}; }}
+          header[data-testid="stHeader"] {{ background: {p['bg']}; }}
+          section[data-testid="stSidebar"] {{ background-color: {p['side']}; }}
+          .stApp, .stApp p, .stApp span, .stApp li, .stApp label, .stApp h1,
+          .stApp h2, .stApp h3, .stApp h4,
+          [data-testid="stMarkdownContainer"] {{ color: {p['text']}; }}
+          [data-testid="stChatMessage"] {{ background-color: {p['elev']};
+              border-radius: 12px; }}
+          [data-testid="stExpander"] {{ background-color: {p['elev']};
+              border: 1px solid {p['border']}; border-radius: 10px; }}
+          [data-testid="stCaptionContainer"] p {{ color: {p['muted']} !important; }}
+          .stChatInput textarea, [data-baseweb="input"] input,
+          [data-baseweb="textarea"] textarea {{
+              background-color: {p['elev']}; color: {p['text']}; }}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 # --------------------------------------------------------------------- sidebar
 def sidebar() -> dict:
     s = st.sidebar
@@ -61,6 +92,9 @@ def sidebar() -> dict:
         )
     else:
         s.caption("🟢 Connected: " + ", ".join(providers))
+
+    theme = s.radio("🎨 Theme", ["Light", "Dark"], horizontal=True,
+                    help="Switch the app between light and dark.")
 
     # ---- Model -------------------------------------------------------------
     s.subheader("🤖 Model")
@@ -152,7 +186,7 @@ def sidebar() -> dict:
         hybrid=hybrid, dense_weight=dense_weight, expand=expand,
         chunk_size=chunk_size, chunk_overlap=chunk_overlap, companies=companies,
         persona=persona, compare=compare, provider_b=provider_b, model_b=model_b,
-        rebuild=rebuild,
+        rebuild=rebuild, theme=theme,
     )
 
 
@@ -176,6 +210,7 @@ def make_engine(cfg, provider, model, retriever):
 # --------------------------------------------------------------------- main
 def main():
     cfg = sidebar()
+    apply_theme(cfg["theme"])
 
     st.session_state.setdefault("messages", [])
 

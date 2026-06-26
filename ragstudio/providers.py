@@ -37,6 +37,16 @@ def build_llm(provider: str, model: str, temperature: float,
             **sampling,
         )
 
+    if spec["kind"] == "anthropic":
+        from langchain_anthropic import ChatAnthropic
+        return ChatAnthropic(
+            model=model,
+            api_key=os.environ[spec["env"]],
+            max_tokens=max_tokens,
+            timeout=180,
+            **sampling,
+        )
+
     # openai + openai_compatible both use ChatOpenAI; base_url switches the host.
     from langchain_openai import ChatOpenAI
     return ChatOpenAI(

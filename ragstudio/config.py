@@ -89,6 +89,19 @@ PROVIDERS: dict[str, dict] = {
         ],
         "note": "Open-source models via HF Inference Providers.",
     },
+    "Xiaomi MiMo": {
+        "kind": "openai_compatible",
+        "env": "XIAOMI_API_KEY",
+        "base_url": "https://token-plan-cn.xiaomimimo.com/v1",
+        "models": ["mimo-v2.5", "mimo-v2.5-pro", "mimo-v2-pro"],
+        "note": "Xiaomi MiMo via the Token Plan endpoint, OpenAI-compatible.",
+    },
+    "Anthropic Claude": {
+        "kind": "anthropic",
+        "env": "ANTHROPIC_API_KEY",
+        "models": ["claude-sonnet-4-6", "claude-opus-4-8", "claude-haiku-4-5-20251001"],
+        "note": "Claude via the Anthropic API.",
+    },
 }
 
 # Models that ignore sampling params (reasoning models) — keep temperature/top_p off.
