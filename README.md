@@ -1,5 +1,7 @@
 # 📊 10-K RAG Studio
 
+> **🔗 Live demo: [rag.gaolihong.com](https://rag.gaolihong.com)** · ask a question, no setup needed.
+
 A **Cherry-Studio-inspired RAG chatbot** that answers questions about the latest
 10-K annual reports of **Alphabet, Amazon, Microsoft, Apple, and Tesla** —
 grounded in the filings, with inline source citations.
@@ -128,6 +130,10 @@ question set with checked ground-truth answers lives in `eval/questions.yaml`.
 ---
 
 ## 🌐 Deploy to a server
+
+The project runs live at **[rag.gaolihong.com](https://rag.gaolihong.com)**
+(Cloudflare → Caddy → a FastAPI service that serves the Next.js UI and the
+streaming `/api`).
 
 See [`deploy/README_DEPLOY.md`](deploy/README_DEPLOY.md). One command on an
 Ubuntu/Debian box sets up a venv, systemd service, and nginx reverse proxy:
